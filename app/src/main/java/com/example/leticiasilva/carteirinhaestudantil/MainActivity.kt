@@ -22,6 +22,11 @@ import com.google.android.gms.vision.barcode.BarcodeDetector
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.ASN1Primitive
 import org.spongycastle.asn1.util.ASN1Dump
+import org.spongycastle.asn1.x500.RDN
+import org.spongycastle.asn1.x500.X500Name
+import org.spongycastle.asn1.x500.style.BCStyle
+import org.spongycastle.asn1.x500.style.IETFUtils
+import org.spongycastle.cert.jcajce.JcaX509CertificateHolder
 
 import java.io.BufferedInputStream
 import java.io.FileInputStream
@@ -32,6 +37,7 @@ import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.util.Scanner
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -80,7 +86,7 @@ class MainActivity : AppCompatActivity() {
                 .setRequestedPreviewSize(640, 480)
                 .build()
 
-        textName = findViewById<TextView>(R.id.name)
+        textName = findViewById<TextView>(R.id.dataName)
 
         //Add Event
         cameraPreviw?.holder?.addCallback(object : SurfaceHolder.Callback {
@@ -130,6 +136,9 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        val push: CertificateX509? = null
+
+        textName.text = push?.readThat()
     }
 
     companion object {
@@ -140,9 +149,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
+
 }
 
-internal class CertificateX509 {
+class CertificateX509 {
 
     var filename = "/home/leticia.silva/Transferências/CertificadoAtributo.ca"
 
@@ -215,4 +226,15 @@ internal class CertificateX509 {
     } catch (e: IOException) {
         e.printStackTrace()
     }
+
+
+    fun readThat(): String? {
+        var x500name: X500Name = JcaX509CertificateHolder(cert).subject
+        var cn: RDN = x500name.getRDNs(BCStyle.CN)[0]
+        var result = IETFUtils.valueToString(cn.first.value)
+
+        return result
+    }
+
+
 }
