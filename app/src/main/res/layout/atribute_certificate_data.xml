@@ -12,7 +12,6 @@
             android:padding="3dip" />
         <TextView
             android:id="@+id/dataName"
-            android:text=""
             android:gravity="right"
             android:padding="3dip" />
     </TableRow>
