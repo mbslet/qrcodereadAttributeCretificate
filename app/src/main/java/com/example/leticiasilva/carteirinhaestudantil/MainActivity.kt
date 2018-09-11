@@ -20,6 +20,7 @@ import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
 
 import org.spongycastle.asn1.ASN1InputStream
+import org.spongycastle.asn1.ASN1Object
 import org.spongycastle.asn1.ASN1Primitive
 import org.spongycastle.asn1.util.ASN1Dump
 import org.spongycastle.asn1.x500.RDN
@@ -138,7 +139,7 @@ class MainActivity : AppCompatActivity() {
 
         val push: CertificateX509? = null
 
-        textName.text = push?.readThat()
+        textName.text = push?.test()
     }
 
     companion object {
@@ -210,8 +211,10 @@ class CertificateX509 {
         val input = ASN1InputStream(fis)
         var p: ASN1Primitive
 
-        while ((p = input.readObject()) != null) {
-            val nome = ASN1Dump.dumpAsString(p)
+        val derObject: ASN1Object  = input.readObject();
+
+        while ((derObject) != null) {
+            val nome = ASN1Dump.dumpAsString(derObject)
             `in` = Scanner(nome)
             while (`in`!!.hasNext()) {
                 val line = `in`!!.nextLine()
