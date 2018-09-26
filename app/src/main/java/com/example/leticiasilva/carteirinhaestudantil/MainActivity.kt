@@ -76,6 +76,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        textName?.text = certX509.svm().
+
+
+    }
+    fun qrcode() {
         cameraPreviw = findViewById<SurfaceView>(R.id.cameraPreview)
         txtResult = findViewById<TextView>(R.id.txtResult)
 
@@ -141,7 +146,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     companion object {
 
         init {
@@ -151,93 +155,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-    class CertificateX509 {
 
-        var filename = "/home/leticia.silva/Transferências/CertificadoAtributo.ca"
-
-        var fis: FileInputStream? = null
-
-        var bis = BufferedInputStream(fis)
-        var cf: CertificateFactory? = null
-
-        var c: Collection<*>? = null
-
-        var cert: X509Certificate? = null
-
-        //   System.out.println(cert.getSubjectDN());
-        var `in`: Scanner? = null
-
-        init {
-            try {
-                fis = FileInputStream(filename)
-            } catch (e: FileNotFoundException) {
-                e.printStackTrace()
-            }
-
-        }
-
-        init {
-            try {
-                cf = CertificateFactory.getInstance("X.509")
-            } catch (e: CertificateException) {
-                e.printStackTrace()
-            }
-
-        }
-
-        init {
-            try {
-                c = cf?.generateCertificates(fis)
-            } catch (e: CertificateException) {
-                e.printStackTrace()
-            }
-
-        }
-
-        init {
-            try {
-                cert = cf?.generateCertificate(bis) as X509Certificate
-            } catch (e: CertificateException) {
-                e.printStackTrace()
-            }
-
-        }
-
-        fun test() = try {
-            val fis = FileInputStream(filename)
-            val input = ASN1InputStream(fis)
-            var p: ASN1Primitive
-
-            val derObject: ASN1Object  = input.readObject()
-
-            while ((derObject) != null) {
-                val nome = ASN1Dump.dumpAsString(derObject)
-                `in` = Scanner(nome)
-                while (`in`!!.hasNext()) {
-                    val line = `in`!!.nextLine()
-                    if (line.contains("PrintableString") || line.contains("UTF8String"))
-                        println(line)
-                }
-
-
-            }
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-
-        fun readThat(): String? {
-            var x500name: X500Name = JcaX509CertificateHolder(cert).subject
-            var cn: RDN = x500name.getRDNs(BCStyle.CN)[0]
-            var result = IETFUtils.valueToString(cn.first.value)
-
-            return result
-        }
-
-
-    }
 
 
 }
