@@ -23,11 +23,15 @@ import org.spongycastle.asn1.DERObjectIdentifier
 import org.spongycastle.asn1.DERTaggedObject
 import org.spongycastle.asn1.ASN1Sequence
 import org.spongycastle.asn1.DERInteger
+import org.spongycastle.asn1.cms.CMSAttributes.messageDigest
 import org.spongycastle.asn1.x500.style.RFC4519Style.c
 import org.spongycastle.jce.provider.X509CRLParser
 import org.spongycastle.jce.provider.X509CertPairParser
 import org.spongycastle.jce.provider.X509CertParser
 import java.io.*
+import java.security.MessageDigest
+import java.security.MessageDigest.getInstance
+import java.security.Signature
 import kotlin.collections.ArrayList
 
 
@@ -35,6 +39,20 @@ private val ID_PKCS7_SIGNED_DATA = "1.2.840.113549.1.7.2"
 private var version: Int = 0
 private val signCert: X509Certificate? = null
 private val ID_MESSAGE_DIGEST = "1.2.840.113549.1.9.4"
+private var provider: String? = null
+private val ID_MD5RSA = "1.2.840.113549.1.1.4"
+private val ID_SHA1RSA = "1.2.840.113549.1.1.5"
+private val ID_ADBE_REVOCATION = "1.2.840.113583.1.1.8"
+private val ID_SIGNING_TIME = "1.2.840.113549.1.9.5"
+private val ID_MD2RSA = "1.2.840.113549.1.1.2"
+private val ID_MD5 = "1.2.840.113549.2.5"
+private val ID_MD2 = "1.2.840.113549.2.2"
+private val ID_SHA1 = "1.3.14.3.2.26"
+private val ID_RSA = "1.2.840.113549.1.1.1"
+private val ID_DSA = "1.2.840.10040.4.1"
+private val ID_CONTENT_TYPE = "1.2.840.113549.1.9.3"
+
+private val sig: Signature? = null
 
 class CertificateX509 {
 
@@ -97,7 +115,6 @@ class CertificateX509 {
             }
         }
 
-        cert?.subjectDN?.name.
 
         val signedData = pkcs as ASN1Sequence
         val objId = signedData.getObjectAt(0) as DERObjectIdentifier
@@ -120,18 +137,21 @@ class CertificateX509 {
 
         // work certificate
 
+
+
         val cr = X509CertParser()
         cr.engineInit(FileInputStream(filename))
         val certs: MutableCollection<Any?> = cr.engineReadAll()
         val cl = X509CRLParser()
         cl.engineInit(FileInputStream(filename))
         val crls: MutableCollection<Any?> = cl.engineReadAll()
+        var RSAdata: ByteArray? = null
 
         var rsaData: ASN1Sequence = content.getObjectAt(2) as ASN1Sequence
 
         if (rsaData.size() > 1) {
             var rsaDataContent: DEROctetString = (rsaData.getObjectAt(1) as DERTaggedObject).`object` as DEROctetString
-            val RSAdata: ByteArray? = rsaDataContent.octets
+          RSAdata = rsaDataContent.octets
         }
 
         var next = 3
@@ -167,17 +187,50 @@ class CertificateX509 {
         val digestAlgorithm: String? = ((signerInfo.getObjectAt(2) as ASN1Sequence).getObjectAt(0) as DERObjectIdentifier).id
         next = 3
 
+        val tagsig = signerInfo.getObjectAt(next) as ASN1TaggedObject
+        val sseq: ASN1Sequence = tagsig.`object` as ASN1Sequence
+        val fOut = FileOutputStream(filename)
+
+        val dout = ASN1OutputStream(fOut)
+        val k = 0
+        val kLess =  sseq.size()
+        var digestAttr: ByteArray? = null
+        val set: ASN1Set
+        var digestEncryptionAlgorithm: String? = null
+        var digest: ByteArray? = null
+        val messageDigest: MessageDigest? = null
+
+        fun  getHashAlgorithm() : String {
+            var da: String = digestAlgorithm!!
+
+            if (digestAlgorithm.equals(ID_MD5) || digestAlgorithm.equals(ID_MD5RSA)) {
+                da = "MD5"
+            }
+            else if (digestAlgorithm.equals(ID_MD2) || digestAlgorithm.equals(ID_MD2RSA)) {
+                da = "MD2"
+            }
+            else if (digestAlgorithm.equals(ID_SHA1) || digestAlgorithm.equals(ID_SHA1RSA)) {
+                da = "SHA1"
+            }
+            return da;
+        }
+
+        fun  getDigestAlgorithm(): String {
+            var dea = digestEncryptionAlgorithm;
+
+            if (digestEncryptionAlgorithm.equals(ID_RSA) || digestEncryptionAlgorithm.equals(ID_MD5RSA)
+                    || digestEncryptionAlgorithm.equals(ID_MD2RSA) || digestEncryptionAlgorithm.equals(ID_SHA1RSA)) {
+                dea = "RSA"
+            }
+            else if (digestEncryptionAlgorithm.equals(ID_DSA)) {
+                dea = "DSA"
+            }
+
+            return getHashAlgorithm() + "with" + dea
+        }
 
         if (signerInfo.getObjectAt(next) is ASN1TaggedObject) {
-            val tagsig = signerInfo.getObjectAt(next) as ASN1TaggedObject
-            val sseq: ASN1Sequence = tagsig.`object` as ASN1Sequence
-            val fOut = FileOutputStream(filename)
 
-            val dout = ASN1OutputStream(fOut)
-            val k = 0
-            val kLess = k < sseq.size()
-            val digestAttr: ByteArray
-            val set: ASN1Set
 
             try {
                 val attribute = ASN1EncodableVector()
@@ -200,9 +253,40 @@ class CertificateX509 {
                 }
             }
 
-            if (digestAttr = null)
+            if (digestAttr == null) {
+                throw IllegalArgumentException("Authenticated attribute is missing the digest.")
+                next++
+            }
+
+            digestEncryptionAlgorithm = ((signerInfo.getObjectAt(next) as ASN1Sequence).getObjectAt(0) as DERObjectIdentifier).id
+            digest = (signerInfo.getObjectAt(next) as DEROctetString).octets
+
+            if (RSAdata != null || digestAttr != null) {
+                if (provider == null || provider!!.startsWith("SunPKCS11"))
+                    messageDigest = getInstance(getHashAlgorithm())
+                else
+                    messageDigest = getInstance(getHashAlgorithm(), provider)
+            }
+
+            if (provider == null)
+                sig = Signature.getInstance(getDigestAlgorithm())
+            else
+                sig = Signature.getInstance(getDigestAlgorithm(), provider)
+            sig.initVerify(signCert.publicKey)
         }
+
+        fun pdfPKCS7(PrivateKey privKey, Certificate[] certChain, CRL[] crlList,
+        String hashAlgorithm, String provider, boolean hasRSAdata)
+
     }
+
+
+
+
+
+
+
+
 
     fun readThat(): String? {
         var x500name: X500Name = JcaX509CertificateHolder(cert).subject
