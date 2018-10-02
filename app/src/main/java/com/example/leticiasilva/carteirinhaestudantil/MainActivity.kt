@@ -2,6 +2,7 @@ package com.example.leticiasilva.carteirinhaestudantil
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Vibrator
@@ -9,9 +10,8 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log.println
 import android.util.SparseArray
-import android.view.SurfaceHolder
-import android.view.SurfaceView
-import android.view.View
+import android.view.*
+import android.widget.Button
 import android.widget.TextView
 
 import com.google.android.gms.vision.CameraSource
@@ -42,14 +42,14 @@ import java.util.Scanner
 
 class MainActivity : AppCompatActivity() {
 
-     var textName: TextView? = null
     var cameraPreviw: SurfaceView? = null
      var txtResult: TextView? = null
      var barcodeDetector: BarcodeDetector? = null
      var cameraSource: CameraSource? = null
      val RequestCameraPermissionID = 1001
+     var buttonAttr: Button? = null
 
-    internal var certX509 = CertificateX509()
+//    internal var certX509 = CertificateX509()
 
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -76,10 +76,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        textName?.text = certX509.svm().
 
+        buttonAttr = findViewById(R.id.buttonAttr)
 
+        buttonAttr?.setOnClickListener {
+            val intent = Intent(this, AttrActivity::class.java)
+            startActivity(intent)
+        }
     }
+
+
     fun qrcode() {
         cameraPreviw = findViewById<SurfaceView>(R.id.cameraPreview)
         txtResult = findViewById<TextView>(R.id.txtResult)
@@ -91,8 +97,6 @@ class MainActivity : AppCompatActivity() {
         cameraSource = CameraSource.Builder(this, barcodeDetector)
                 .setRequestedPreviewSize(640, 480)
                 .build()
-
-        textName = findViewById<TextView>(R.id.dataName)
 
         //Add Event
         cameraPreviw?.holder?.addCallback(object : SurfaceHolder.Callback {
