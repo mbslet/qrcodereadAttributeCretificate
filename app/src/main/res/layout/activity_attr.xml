@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AttrActivity">
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:stretchColumns="1">
+
+        <TableRow>
+            <TextView
+                android:id="@+id/name"
+                android:layout_column="1"
+                android:text="Nome"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/dataName"
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="CPF"
+                android:padding="3dip" />
+            <TextView
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="UF"
+                android:padding="3dip" />
+            <TextView
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <!--<View-->
+        <!--android:layout_height="2dip"-->
+        <!--android:background="#FF909090" />-->
+
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="Email"
+                android:padding="3dip"
+                />
+            <TextView
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/cnpj"
+                android:layout_column="1"
+                android:text="CNPJ"
+                android:padding="3dip"/>
+
+            <TextView
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="(campo)" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="DATA_NASCIMENTO"
+                android:padding="3dip"
+                />
+            <TextView
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="DATA_NASCIMENTO"
+                android:padding="3dip"
+                />
+            <TextView
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+    </TableLayout>
+
+</android.support.constraint.ConstraintLayout>
