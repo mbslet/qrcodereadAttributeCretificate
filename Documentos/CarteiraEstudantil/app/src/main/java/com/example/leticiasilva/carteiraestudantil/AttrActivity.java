@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Scanner;
-;
+
 import org.jetbrains.annotations.Nullable;
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.ASN1Primitive;
@@ -46,7 +46,7 @@ public final class AttrActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_attr);
 
-        this.textName = (TextView) this.findViewById(R.id.name);
+        this.textName = this.findViewById(R.id.name);
         this.textCpf = this.findViewById(R.id.cpf);
         this.textUf = this.findViewById(R.id.uf);
 
@@ -73,17 +73,18 @@ public final class AttrActivity extends AppCompatActivity {
                     c.getSerialNumber());
             System.out.println("\tGenerated with " +
                     c.getSigAlgName());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        RDN cn = c.getSubject().getRDNs(BCStyle.CN)[0];
-        return ((ASN1String)cn.getFirst().getValue()).getString();
+//        RDN cn = c.getSubject().getRDNs(BCStyle.CN)[0];
+//        return ((ASN1String)cn.getFirst().getValue()).getString();
 
 
-        this.textName.setText((CharSequence) c.getSerialNumber());
+//        this.textName.setText((CharSequence) c.getSerialNumber());
         this.textCpf.setText((CharSequence) c.getSubjectDN());
-        this.textUf.setText((CharSequence) c.getIssuerDN());
+        this.textUf.setText(c.getIssuerDN().getName());
 
 
 
@@ -103,3 +104,12 @@ public final class AttrActivity extends AppCompatActivity {
     }
 }
 
+//Enumeration enumeration = ks.aliases();
+//while (enumeration.hasMoreElements()) {
+//    String aliass = (String) enumeration.nextElement();
+//    X509Certificate cer = (X509Certificate) ks.getCertificate(aliass);
+//    X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
+//    RDN cn = x500name.getRDNs(BCStyle.CN)[0];
+//    String s = IETFUtils.valueToString(cn.getFirst().getValue());
+//    System.out.println(s);
+//}

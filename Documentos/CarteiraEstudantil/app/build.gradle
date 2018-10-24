@@ -37,6 +37,17 @@ dependencies {
     implementation 'com.google.android.gms:play-services:9.8.0'
 
     implementation 'org.jetbrains:annotations-java5:15.0'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation "com.google.firebase:firebase-core:15.0.2"
+    implementation "com.google.firebase:firebase-messaging:15.0.2"
+
+
+    implementation ('com.github.ViksaaSkool:AwesomeSplash:v1.0.0') {
+        exclude group: 'com.android.support'
+        exclude module: 'appcompat-v7'
+        exclude module: 'support-v4'
+    }
+
 
 
 

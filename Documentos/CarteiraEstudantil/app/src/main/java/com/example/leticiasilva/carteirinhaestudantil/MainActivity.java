@@ -1,8 +1,6 @@
 package com.example.leticiasilva.carteirinhaestudantil;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,12 +8,10 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.SurfaceHolder.Callback;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
@@ -23,21 +19,21 @@ import android.widget.TextView;
 import com.example.leticiasilva.carteiraestudantil.AttrActivity;
 import com.example.leticiasilva.carteiraestudantil.R;
 import com.google.android.gms.vision.CameraSource;
-import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Detector.Detections;
 import com.google.android.gms.vision.Detector.Processor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.google.android.gms.vision.barcode.BarcodeDetector.Builder;
 
+import org.spongycastle.asn1.x500.RDN;
+import org.spongycastle.asn1.x500.style.BCStyle;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.Provider;
-import java.security.Security;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.spongycastle.jce.provider.BouncyCastleProvider;
+import java.util.Scanner;
 
 
 public final class MainActivity extends AppCompatActivity {
@@ -56,8 +52,13 @@ public final class MainActivity extends AppCompatActivity {
 
     private HashMap _$_findViewCache;
 
+    private TextView textName;
+    private TextView textCpf;
+    private TextView textUf;
 
-    public final SurfaceView getCameraPreviw() {
+
+
+    private final SurfaceView getCameraPreviw() {
         return this.cameraPreviw;
     }
 
@@ -66,7 +67,7 @@ public final class MainActivity extends AppCompatActivity {
     }
 
 
-    public final TextView getTxtResult() {
+    private final TextView getTxtResult() {
         return this.txtResult;
     }
 
@@ -101,7 +102,7 @@ public final class MainActivity extends AppCompatActivity {
         return this.buttonAttr;
     }
 
-    public final void setButtonAttr(Button buttonAttr) {
+    private final void setButtonAttr(Button buttonAttr) {
         this.buttonAttr = buttonAttr;
     }
 
@@ -129,18 +130,26 @@ public final class MainActivity extends AppCompatActivity {
         this.setContentView(R.layout.activity_main);
 
         Button buttonAttr = (Button) findViewById(R.id.buttonAttr);
-        
-        buttonAttr.setOnClickListener(new OnClickListener() {
-            Log.
+
+        buttonAttr.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
-
-                Intent intent = new Intent(getBaseContext(), AttrActivity.class);
-                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, AttrActivity.class);
+                MainActivity.this.startActivity(intent);
             }
 
+
         });
-        
+
+
+//RDN cn = c.getSubject().getRDNs(BCStyle.CN)[0];
+//return ((ASN1String)cn.getFirst().getValue()).getString();
+//*/
+
+
+
+
     }
 
    
@@ -201,6 +210,7 @@ public final class MainActivity extends AppCompatActivity {
                 SparseArray<Barcode> qrcodes = detections.getDetectedItems();
                 if (qrcodes.size() != 0) {
                     Vibrator vibrator = (Vibrator)getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+                    assert vibrator != null;
                     vibrator.vibrate(1000);
 
                     txtResult.setText(qrcodes.valueAt(0).displayValue);
