@@ -12,7 +12,6 @@ import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -24,16 +23,8 @@ import com.google.android.gms.vision.Detector.Processor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
-import org.spongycastle.asn1.x500.RDN;
-import org.spongycastle.asn1.x500.style.BCStyle;
-
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.Scanner;
 
 
 public final class MainActivity extends AppCompatActivity {

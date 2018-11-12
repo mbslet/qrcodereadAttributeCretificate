@@ -14,12 +14,12 @@
 
         <TableRow>
             <TextView
-                android:id="@+id/name"
+                android:id="@+id/cnam"
                 android:layout_column="1"
-                android:text="Nome"
+                android:text="Country Name"
                 android:padding="3dip" />
             <TextView
-                android:id="@+id/dataName"
+                android:id="@+id/c"
                 android:text="(campo)"
                 android:gravity="right"
                 android:padding="3dip" />
@@ -27,11 +27,12 @@
 
         <TableRow>
             <TextView
-                android:id="@+id/cpf"
+                android:id="@+id/on"
                 android:layout_column="1"
-                android:text="CPF"
+                android:text="Oganization Name"
                 android:padding="3dip" />
             <TextView
+                android:id="@+id/o"
                 android:text="(campo)"
                 android:gravity="right"
                 android:padding="3dip" />
@@ -39,11 +40,12 @@
 
         <TableRow>
             <TextView
-                android:id="@+id/uf"
+                android:id="@+id/oun"
                 android:layout_column="1"
-                android:text="UF"
+                android:text="Organization Unit Name"
                 android:padding="3dip" />
             <TextView
+                android:id="@+id/ou"
                 android:text="(campo)"
                 android:gravity="right"
                 android:padding="3dip" />
@@ -56,51 +58,52 @@
         <TableRow>
             <TextView
                 android:layout_column="1"
-                android:text="Email"
+                android:text="Common Name"
                 android:padding="3dip"
                 />
             <TextView
+                android:id="@+id/comn"
                 android:text="(campo)"
                 android:gravity="right"
                 android:padding="3dip" />
         </TableRow>
 
-        <TableRow>
-            <TextView
-                android:id="@+id/cnpj"
-                android:layout_column="1"
-                android:text="CNPJ"
-                android:padding="3dip"/>
+        <!--<TableRow>-->
+            <!--<TextView-->
+                <!--android:id="@+id/cnpj"-->
+                <!--android:layout_column="1"-->
+                <!--android:text="CNPJ"-->
+                <!--android:padding="3dip"/>-->
 
-            <TextView
-                android:gravity="right"
-                android:padding="3dip"
-                android:text="(campo)" />
-        </TableRow>
+            <!--<TextView-->
+                <!--android:gravity="right"-->
+                <!--android:padding="3dip"-->
+                <!--android:text="(campo)" />-->
+        <!--</TableRow>-->
 
-        <TableRow>
-            <TextView
-                android:layout_column="1"
-                android:text="DATA_NASCIMENTO"
-                android:padding="3dip"
-                />
-            <TextView
-                android:text="(campo)"
-                android:gravity="right"
-                android:padding="3dip" />
-        </TableRow>
+        <!--<TableRow>-->
+            <!--<TextView-->
+                <!--android:layout_column="1"-->
+                <!--android:text="DATA_NASCIMENTO"-->
+                <!--android:padding="3dip"-->
+                <!--/>-->
+            <!--<TextView-->
+                <!--android:text="(campo)"-->
+                <!--android:gravity="right"-->
+                <!--android:padding="3dip" />-->
+        <!--</TableRow>-->
 
-        <TableRow>
-            <TextView
-                android:layout_column="1"
-                android:text="DATA_NASCIMENTO"
-                android:padding="3dip"
-                />
-            <TextView
-                android:text="(campo)"
-                android:gravity="right"
-                android:padding="3dip" />
-        </TableRow>
+        <!--<TableRow>-->
+            <!--<TextView-->
+                <!--android:layout_column="1"-->
+                <!--android:text="DATA_NASCIMENTO"-->
+                <!--android:padding="3dip"-->
+                <!--/>-->
+            <!--<TextView-->
+                <!--android:text="(campo)"-->
+                <!--android:gravity="right"-->
+                <!--android:padding="3dip" />-->
+        <!--</TableRow>-->
     </TableLayout>
 
 </android.support.constraint.ConstraintLayout>
