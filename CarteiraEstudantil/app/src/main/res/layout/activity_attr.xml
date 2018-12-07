@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AttrActivity">
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:stretchColumns="1">
+
+        <TableRow>
+            <TextView
+                android:id="@+id/cnam"
+                android:layout_column="1"
+                android:text="Country Name"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/c"
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/on"
+                android:layout_column="1"
+                android:text="Oganization Name"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/o"
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/oun"
+                android:layout_column="1"
+                android:text="Organization Unit Name"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/ou"
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <!--<View-->
+        <!--android:layout_height="2dip"-->
+        <!--android:background="#FF909090" />-->
+
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="Common Name"
+                android:padding="3dip"
+                />
+            <TextView
+                android:id="@+id/comn"
+                android:text="(campo)"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <!--<TableRow>-->
+            <!--<TextView-->
+                <!--android:id="@+id/cnpj"-->
+                <!--android:layout_column="1"-->
+                <!--android:text="CNPJ"-->
+                <!--android:padding="3dip"/>-->
+
+            <!--<TextView-->
+                <!--android:gravity="right"-->
+                <!--android:padding="3dip"-->
+                <!--android:text="(campo)" />-->
+        <!--</TableRow>-->
+
+        <!--<TableRow>-->
+            <!--<TextView-->
+                <!--android:layout_column="1"-->
+                <!--android:text="DATA_NASCIMENTO"-->
+                <!--android:padding="3dip"-->
+                <!--/>-->
+            <!--<TextView-->
+                <!--android:text="(campo)"-->
+                <!--android:gravity="right"-->
+                <!--android:padding="3dip" />-->
+        <!--</TableRow>-->
+
+        <!--<TableRow>-->
+            <!--<TextView-->
+                <!--android:layout_column="1"-->
+                <!--android:text="DATA_NASCIMENTO"-->
+                <!--android:padding="3dip"-->
+                <!--/>-->
+            <!--<TextView-->
+                <!--android:text="(campo)"-->
+                <!--android:gravity="right"-->
+                <!--android:padding="3dip" />-->
+        <!--</TableRow>-->
+    </TableLayout>
+
+</android.support.constraint.ConstraintLayout>
