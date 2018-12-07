@@ -9,46 +9,41 @@ import android.util.Log;
 import android.widget.TextView;
 
 import org.jetbrains.annotations.Nullable;
+import org.spongycastle.asn1.ASN1Encodable;
 import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Integer;
+import org.spongycastle.asn1.ASN1Object;
 import org.spongycastle.asn1.ASN1Primitive;
 import org.spongycastle.asn1.ASN1Sequence;
-import org.spongycastle.asn1.ASN1String;
-import org.spongycastle.asn1.DERObjectIdentifier;
-import org.spongycastle.asn1.DEROctetString;
-import org.spongycastle.asn1.DERUTF8String;
+import org.spongycastle.asn1.ASN1Set;
+import org.spongycastle.asn1.ASN1TaggedObject;
+import org.spongycastle.asn1.DERBitString;
 import org.spongycastle.asn1.util.ASN1Dump;
 import org.spongycastle.asn1.x500.RDN;
 import org.spongycastle.asn1.x500.X500Name;
 import org.spongycastle.asn1.x500.style.BCStyle;
 import org.spongycastle.asn1.x500.style.IETFUtils;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.AttCertIssuer;
+import org.spongycastle.asn1.x509.AttCertValidityPeriod;
+import org.spongycastle.asn1.x509.Attribute;
+import org.spongycastle.asn1.x509.Extensions;
+import org.spongycastle.asn1.x509.Holder;
+import org.spongycastle.asn1.x509.RoleSyntax;
+import org.spongycastle.cert.X509AttributeCertificateHolder;
 import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.spongycastle.jcajce.provider.keystore.BC;
+import org.spongycastle.util.encoders.Base64;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Principal;
-import java.security.PublicKey;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.Objects;
+import java.util.Collection;
 import java.util.Scanner;
-import java.util.Set;
 
 
 public final class AttrActivity extends AppCompatActivity {
@@ -58,14 +53,39 @@ public final class AttrActivity extends AppCompatActivity {
     private TextView textOun;
     String filePath = "/media/leticia.silva/Seagate Expansion Drive/certificados/extraidos/ADELVIRO NUNES-396881279490123168072.cer";
     FileInputStream fis;
+    String sPem = "/home/leticia.silva/Documentos/bruno.pem";
 
     X509Certificate cert = null;
     X500Name xname = null;
     CertificateFactory cf = null;
+    Collection c = null;
+
+    String country = "BR";
+    String org = "ICP-BRASIL";
+    String uni = "UNIAO NACIONAL DOS ESTUDANTES";
+    String name = "BunoPereiraLopes";
+    String orgUnit = "Autoridade Certificadora VALID - AC VALID";
+
+
+
+    private ASN1Integer version;
+    private Holder holder;
+    private AttCertIssuer issuer;
+    private AlgorithmIdentifier signature;
+    private ASN1Integer serialNumber;
+    private AttCertValidityPeriod attrCertValidityPeriod;
+    private ASN1Sequence attributes;
+    private DERBitString issuerUniqueID;
+    private Extensions extensions;
+
+
+    public AttrActivity() throws InstantiationException, IllegalAccessException, IOException {
+    }
 
     public final TextView getTextName() {
         return this.textCnam;
     }
+
 
 
     @SuppressLint("Assert")
@@ -73,91 +93,174 @@ public final class AttrActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_attr);
-
+        if(sPem != "/home/leticia.silva/Documentos/wilson.cer") {
+            country = "Error";
+            org = "Error";
+            name = "Error";
+        }
         this.textCnam = this.findViewById(R.id.c);
-        this.textOn= this.findViewById(R.id.o);
+        this.textOn = this.findViewById(R.id.o);
         this.textOun = this.findViewById(R.id.ou);
 
 
+        Log.i("teste2", "entrei aqui");
 
 
-//        this.textName.setText((CharSequence) c.getSerialNumber());
+        BufferedInputStream bis = null;
+        CertificateFactory cf;
+        File filePath = new File("CertificadoAtributo.ca");
 
-        if (filePath != null) {
-            Log.e("filepath", "FILE NULO");
-        }
+
+        FileInputStream fis = null;
+
         try {
             fis = new FileInputStream(filePath);
+            cf = CertificateFactory.getInstance("X.509");                                              //  - ACESSA OS DADOS DO CERTIFICADO
+            cert = ( X509Certificate ) cf.generateCertificate(fis);                                    //  - NÃO MOSTRA NA VIEW
+                                                                                                       //  - PROBLEMAS COM ALGUNS FORMATOS
+            ASN1Primitive p;                                                                           //  - ACESSA/RETORNA ALGUNS DADOS, OUTROS NÃO SÃO RETORNADOS
+
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
         }
 
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        if (bis != null) {
-            Log.e("bis", "BIS NULO");
-        }
-
+        ASN1InputStream input = new ASN1InputStream(fis);
 
         try {
             cf = CertificateFactory.getInstance("X.509");
 
-            if (cf != null) {
-                Log.e("cf", "CF NULO");
-            }
 
-            Log.e("cert", "estou entrando");
-            cert = (X509Certificate) cf.generateCertificate(bis);
-            if (cert == null) {
-                Log.e("certAQUI", "CERTO EH NULO");
-            }
+            cert = ( X509Certificate ) cf.generateCertificate(bis);
 
-            Log.e("cert", "passei aqui");
-            Log.e("cert", "até aqui ok");
 
             xname = new JcaX509CertificateHolder(cert).getSubject();
 
-            if (xname != null) {
-                Log.e("eaw", "NAME NULO");
-            }
-
-            Log.e("cert", "problema aqui");
 
         } catch (CertificateException e) {
             e.printStackTrace();
         }
 
+        if (filePath == null) {
+            Log.e("valida", "Ta vazio");
+        }
+
+        Log.e("Teste", "Funcionando");
 
 
+//        RDN orgUnitName = xname.getRDNs(BCStyle.OU)[0];
+//        RDN cn = xname.getRDNs(BCStyle.CN)[0];
 
-        RDN c = xname.getRDNs(BCStyle.C)[0];
-        RDN orgName = xname.getRDNs(BCStyle.O)[0];
-        RDN orgUnitName = xname.getRDNs(BCStyle.OU)[0];
-        RDN cn = xname.getRDNs(BCStyle.CN)[0];
-//        RDN sha1 = xname.getRDNs(BCStyle.)
-
-
-        String cS = IETFUtils.valueToString(c.getFirst().getValue());
-        String orgNameS = IETFUtils.valueToString(orgName.getFirst().getValue());
-        String orgUnitNameS = IETFUtils.valueToString(orgUnitName.getFirst().getValue());
-        String cnS = IETFUtils.valueToString(cn.getFirst().getValue());
-
-        textCnam.setText(cS);
-        textOn.setText(orgNameS);
-        textOun.setText(orgUnitNameS);
+//        String orgUnitNameS = IETFUtils.valueToString(orgUnitName.getFirst().getValue());
+//        String cnS = IETFUtils.valueToString(cn.getFirst().getValue());
 
 
+        Log.e("DEBU_COUNTRY", country);
+        Log.e("DEBUG_ORG", org);
+        Log.e("DEBUG_NEME", name);
 
-//        X500Principal principal = cert.getSubjectX500Principal().toString();
-//
-//        X500Name x500name = new X500Name( principal.getName() );
-//        RDN cn = x500name.getRDNs(BCStyle.CN)[0];
-//
-//        String value =  ((ASN1String)cn.getFirst().getValue()).getString();
-//
-//        this.textCpf.setText(value);
     }
 
+    public static abstract class AttributeCertificateInfo
+            extends ASN1Object {
+        private ASN1Integer version;
+        private Holder holder;
+        private AttCertIssuer issuer;
+        private AlgorithmIdentifier signature;
+        private ASN1Integer serialNumber;
+        private AttCertValidityPeriod attrCertValidityPeriod;
+        private ASN1Sequence attributes;
+        private DERBitString issuerUniqueID;
+        private Extensions extensions;
+
+        public static AttributeCertificateInfo getInstance(
+                ASN1TaggedObject obj,
+                boolean explicit) {
+            return getInstance(ASN1Sequence.getInstance(obj, explicit));
+        }
+
+        public static AttributeCertificateInfo getInstance(
+                Object obj) {
+            if (obj instanceof AttributeCertificateInfo) {
+                return ( AttributeCertificateInfo ) obj;
+            } else if (obj != null) {
+                return new AttributeCertificateInfo(ASN1Sequence.getInstance(obj)) {
+                    @Override
+                    public ASN1Primitive toASN1Primitive() {
+                        return null;
+                    }
+                };
+            }
+
+            return null;
+        }
+
+        private AttributeCertificateInfo(
+                ASN1Sequence seq) {
+            if (seq.size() < 7 || seq.size() > 9) {
+                throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+            }
+
+            this.version = ASN1Integer.getInstance(seq.getObjectAt(0));
+            this.holder = Holder.getInstance(seq.getObjectAt(1));
+            this.issuer = AttCertIssuer.getInstance(seq.getObjectAt(2));
+            this.signature = AlgorithmIdentifier.getInstance(seq.getObjectAt(3));
+            this.serialNumber = ASN1Integer.getInstance(seq.getObjectAt(4));
+            this.attrCertValidityPeriod = AttCertValidityPeriod.getInstance(seq.getObjectAt(5));
+            this.attributes = ASN1Sequence.getInstance(seq.getObjectAt(6));
+
+            for (int i = 7; i < seq.size(); i++) {
+                ASN1Encodable obj = ( ASN1Encodable ) seq.getObjectAt(i);
+
+                if (obj instanceof DERBitString) {
+                    this.issuerUniqueID = DERBitString.getInstance(seq.getObjectAt(i));
+                } else if (obj instanceof ASN1Sequence || obj instanceof Extensions) {
+                    this.extensions = Extensions.getInstance(seq.getObjectAt(i));
+                }
+            }
+        }
+
+        public ASN1Integer getVersion() {
+            return version;
+        }
+
+        public Holder getHolder() {
+            return holder;
+        }
+
+        public AttCertIssuer getIssuer() {
+            return issuer;
+        }
+
+        public AlgorithmIdentifier getSignature() {
+            return signature;
+        }
+
+        public ASN1Integer getSerialNumber() {
+            return serialNumber;
+        }
+
+        public AttCertValidityPeriod getAttrCertValidityPeriod() {
+            return attrCertValidityPeriod;
+        }
+
+        public ASN1Sequence getAttributes() {
+            return attributes;
+        }
+
+        public DERBitString getIssuerUniqueID() {
+            return issuerUniqueID;
+        }
+
+        public Extensions getExtensions() {
+            return extensions;
+        }
+
+
+    }
+}
 
 
 
@@ -243,7 +346,8 @@ public final class AttrActivity extends AppCompatActivity {
 //    private String nome;
 //    private String ceiPessoaFisica;
 //    private String pisPasep;
-//    private String email;
+//            Scanner in = null;
+//private String email;
 //    private String dataNascimento;
 //    private String numeroIdentidade;
 //    private String orgaoExpedidorIdentidade;
@@ -459,5 +563,5 @@ public final class AttrActivity extends AppCompatActivity {
 //        pw.write(sb.toString());
 //        pw.flush();
 //
-//    }
-}
+
+
