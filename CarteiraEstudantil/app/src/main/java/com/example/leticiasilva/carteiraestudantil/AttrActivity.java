@@ -8,42 +8,49 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.android.gms.common.util.IOUtils;
+
 import org.jetbrains.annotations.Nullable;
 import org.spongycastle.asn1.ASN1Encodable;
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.ASN1Integer;
 import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
 import org.spongycastle.asn1.ASN1Primitive;
 import org.spongycastle.asn1.ASN1Sequence;
-import org.spongycastle.asn1.ASN1Set;
 import org.spongycastle.asn1.ASN1TaggedObject;
 import org.spongycastle.asn1.DERBitString;
-import org.spongycastle.asn1.util.ASN1Dump;
 import org.spongycastle.asn1.x500.RDN;
 import org.spongycastle.asn1.x500.X500Name;
 import org.spongycastle.asn1.x500.style.BCStyle;
-import org.spongycastle.asn1.x500.style.IETFUtils;
 import org.spongycastle.asn1.x509.AlgorithmIdentifier;
 import org.spongycastle.asn1.x509.AttCertIssuer;
 import org.spongycastle.asn1.x509.AttCertValidityPeriod;
-import org.spongycastle.asn1.x509.Attribute;
 import org.spongycastle.asn1.x509.Extensions;
 import org.spongycastle.asn1.x509.Holder;
-import org.spongycastle.asn1.x509.RoleSyntax;
-import org.spongycastle.cert.X509AttributeCertificateHolder;
+import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.spongycastle.util.encoders.Base64;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.openssl.PEMParser;
+import org.spongycastle.pkcs.PKCS10CertificationRequest;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Scanner;
 
 
 public final class AttrActivity extends AppCompatActivity {
@@ -79,6 +86,38 @@ public final class AttrActivity extends AppCompatActivity {
     private Extensions extensions;
 
 
+    private static final String COUNTRY = "2.5.4.6";
+    private static final String STATE = "2.5.4.8";
+    private static final String LOCALE = "2.5.4.7";
+    private static final String ORGANIZATION = "2.5.4.10";
+    private static final String ORGANIZATION_UNIT = "2.5.4.11";
+    private static final String COMMON_NAME = "2.5.4.3";
+    private static final String EMAIL = "2.5.4.9";
+
+    private static final String csrPEM = "-----BEGIN CERTIFICATE REQUEST-----\n"
+            + "MIIDkDCCAngCAQEwc6BxMGykajBoMQswCQYDVQQGEwJCUjETMBEGA1UECgwKSUNQ\n"
+            + "LUJSQVNJTDEmMCQGA1UECwwdVU5JQU8gTkFDSU9OQUwgRE9TIEVTVFVEQU5URVMx\n"
+            + "HDAaBgNVBAMME0JydW5vIFBlcmVpcmEgTG9wZXMCAQGgdjB0pHIwcDELMAkGA1UE\n"
+            + "BhMCQlIxEzARBgNVBAoTCklDUC1CcmFzaWwxMjAwBgNVBAsTKUF1dG9yaWRhZGUg\n"
+            + "Q2VydGlmaWNhZG9yYSBWQUxJRCAtIEFDIFZBTElEMRgwFgYDVQQDEw9BQyBWQUxJ\n"
+            + "RCBCUkFTSUwwDQYJKoZIhvcNAQEFBQACA1Ic+DAiGA8yMDE3MDEyNzAwMDAwMFoY\n"
+            + "DzIwMTgwMzMxMjM1OTU5WjCBwDBGBgVgTAEKATE9EzswOTEwMTk4OTEwNzcwMzE3\n"
+            + "NjkzMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDE3MTI3ODA5ICAgICAgICAgIDB2BgVg\n"
+            + "TAEKAjFtE2tJZnNwLWluc3RpdHV0byBGZWRlcmFsIGRlIEVkdWNhY2FvLCBDaWVu\n"
+            + "U1VQRVJJT1IgICAgICAgIEFuYWxpc2UgZSBEZXNlbnZvbHZpbWVudG8gZGUgU2Fv\n"
+            + "IFBhdWxvICAgICAgICAgICBTUDCBijAsBgNVHR8EJTAjoSGGH2h0dHBzOi8vaWNw\n"
+            + "LmNkbmUuY29tLmJyL2NybC51bmUwHQYDVR0jBBaAFGyz7MAZeRUdTlpXHD318I17\n"
+            + "Q2HxMDsGCCsGAQUFBwEBBC8wLQYIKwYBBQUHMAIEIYYfaHR0cHM6Ly9pY3AuY2Ru\n"
+            + "ZS5jb20uYnIvY3JsLnVuZTANBgkqhkiG9w0BAQUFAAOCAQEACU5C78NstL7h14wX\n"
+            + "MNdy8D8luklBy7aGigMcpj7AgmA8n2F9SPpsZWgpYEhrMlo9G2xtT5Dx2PVH1nPo\n"
+            + "HT+8bo0BtXXERsoTOQYkbKx9mAI/c2QPGilkwMB9T5kbCMTITS/PoFXM8toezndc\n"
+            + "vq16d7kV0YjLlUf+DfcPFGqtv1pHh7qzUSDR6lMg8GYrB99Ze/LLOO/5vzE0RRgj\n"
+            + "8mx2MVH1czvBjZTiQYwMVEV6qqgBFol3IGfpLyMBG0dyBEwREeW1pnQPUBeABKJW\n"
+            + "XeSk9xfu6a3LrMJO2SH2o5zmWnrfSsykYb/CLEYVWhxKB1uQIF8g/BGkj9Dz4ypm\n"
+            + "GuD4Sg==\n"
+            + "-----END CERTIFICATE REQUEST-----\n";
+
+
     public AttrActivity() throws InstantiationException, IllegalAccessException, IOException {
     }
 
@@ -93,7 +132,7 @@ public final class AttrActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_attr);
-        if(sPem != "/home/leticia.silva/Documentos/wilson.cer") {
+        if(sPem != "/home/leticia.silva/Documentos/bruno.pem") {
             country = "Error";
             org = "Error";
             name = "Error";
@@ -157,10 +196,91 @@ public final class AttrActivity extends AppCompatActivity {
 //        String cnS = IETFUtils.valueToString(cn.getFirst().getValue());
 
 
-        Log.e("DEBU_COUNTRY", country);
-        Log.e("DEBUG_ORG", org);
-        Log.e("DEBUG_NEME", name);
+//        Log.e("DEBU_COUNTRY", country);
+//        Log.e("DEBUG_ORG", org);
+//        Log.e("DEBUG_NEME", name);
 
+        InputStream stream = new ByteArrayInputStream(csrPEM.getBytes(StandardCharsets.UTF_8));
+
+        AttrActivity m = null;
+        try {
+            m = new AttrActivity();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String a = readCertificateSigningRequest(stream);
+
+        Log.e("3", a);
+    }
+
+
+
+    public String readCertificateSigningRequest(InputStream csrStream) {
+
+        PKCS10CertificationRequest csr = convertPemToPKCS10CertificationRequest(csrStream);
+        String compname = null;
+
+        if (csr == null) {
+            Log.e("1","FAIL! conversion of Pem To PKCS10 Certification Request");
+        } else {
+            X500Name x500Name = csr.getSubject();
+
+            System.out.println("x500Name is: " + x500Name + "\n");
+
+            RDN cn = x500Name.getRDNs(BCStyle.EmailAddress)[0];
+            System.out.println(cn.getFirst().getValue().toString());
+            compname = x500Name.getRDNs(BCStyle.EmailAddress)[0].toString();
+            System.out.println("COUNTRY: " + getX500Field(COUNTRY, x500Name));
+            System.out.println("STATE: " + getX500Field(STATE, x500Name));
+            System.out.println("LOCALE: " + getX500Field(LOCALE, x500Name));
+            System.out.println("ORGANIZATION: " + getX500Field(ORGANIZATION, x500Name));
+            System.out.println("ORGANIZATION_UNIT: " + getX500Field(ORGANIZATION_UNIT, x500Name));
+            System.out.println("COMMON_NAME: " + getX500Field(COMMON_NAME, x500Name));
+            System.out.println("EMAIL: " + getX500Field(EMAIL, x500Name));
+        }
+        return compname;
+    }
+
+
+    private String getX500Field(String asn1ObjectIdentifier, X500Name x500Name) {
+        RDN[] rdnArray = x500Name.getRDNs(new ASN1ObjectIdentifier(asn1ObjectIdentifier));
+
+        String retVal = null;
+        for (RDN item : rdnArray) {
+            retVal = item.getFirst().getValue().toString();
+        }
+        return retVal;
+    }
+
+    private PKCS10CertificationRequest convertPemToPKCS10CertificationRequest(InputStream pem) {
+        Security.addProvider(new BouncyCastleProvider());
+        PKCS10CertificationRequest csr = null;
+        ByteArrayInputStream pemStream = null;
+
+        pemStream = (ByteArrayInputStream) pem;
+
+        Reader pemReader = new BufferedReader(new InputStreamReader(pemStream));
+        PEMParser pemParser = null;
+        try {
+            pemParser = new PEMParser(pemReader);
+            Object parsedObj = pemParser.readObject();
+            System.out.println("PemParser returned: " + parsedObj);
+            if (parsedObj instanceof PKCS10CertificationRequest) {
+                csr = (PKCS10CertificationRequest) parsedObj;
+            }
+        } catch (IOException ex) {
+            Log.e("2", "IOException, convertPemToPublicKey", ex);
+        } finally {
+            if (pemParser != null) {
+                IOUtils.closeQuietly(pemParser);
+            }
+        }
+        return csr;
     }
 
     public static abstract class AttributeCertificateInfo
@@ -257,6 +377,21 @@ public final class AttrActivity extends AppCompatActivity {
         public Extensions getExtensions() {
             return extensions;
         }
+
+
+    }
+
+    public static void readCertificatePEMFile(File sPem) throws IOException, CertificateException {
+
+        Object object = null;
+        if (sPem.exists() && sPem.canRead()) {
+            InputStream inStream = new FileInputStream(sPem);
+            PEMParser pemParser = new PEMParser(new InputStreamReader(inStream));
+             object = pemParser.readObject();
+            if (object != null && object instanceof X509CertificateHolder) {
+                 new JcaX509CertificateConverter().getCertificate(( X509CertificateHolder ) object);
+            }
+        }                String a = object.toString();
 
 
     }
